@@ -1,11 +1,11 @@
 import java.util.Arrays;
 
 public class Observation {
-    private String output;
+    private String label;
     private double[] features;
 
     public Observation(String label, double[] features) {
-        this.output = label;
+        this.label = label;
         this.features = features;
     }
 
@@ -13,12 +13,12 @@ public class Observation {
         this.features = features;
     }
 
-    public String getOutput() {
-        return output;
+    public String getLabel() {
+        return label;
     }
 
-    public void setOutput(String output) {
-        this.output = output;
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     public double[] getFeatures() {
@@ -32,7 +32,7 @@ public class Observation {
     @Override
     public String toString() {
         return "Observation{" +
-                "label='" + output + '\'' +
+                "label='" + label + '\'' +
                 ", features=" + Arrays.toString(features) +
                 '}';
     }
