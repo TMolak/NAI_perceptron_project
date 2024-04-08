@@ -1,10 +1,8 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.InputStreamReader;
+import java.util.*;
 
 public class Perceptron {
 
@@ -25,7 +23,8 @@ public class Perceptron {
         trainingList = loadData(trainingPath);
         testList = loadData(testPath);
         this.epoch = epoch;
-        initializeWeights(trainingList.get(0).getFeatures().length);
+        int numOfWeights = trainingList.get(0).getFeatures().length;
+        initializeWeights(numOfWeights);
     }
 
     public List<Observation> loadData(String path){
@@ -92,16 +91,47 @@ public class Perceptron {
                 double trueLabel = labelMap.get(observation.getLabel());
                 double error = trueLabel - predicted;
                 for (int j = 0; j < observation.getFeatures().length; j++) {
-                    weights[j] += learningRate * error * observation.getFeatures()[j];
+                    weights[j] += (trueLabel-predicted)*learningRate*observation.getFeatures()[j];
                 }
                 bias += learningRate * error;
             }
+            double accuracy = testAccuracy(testList);
+            System.out.println("Dokładność po epoce " + (i+1) + ": " + accuracy + "%");
+            Collections.shuffle(observationList);
         }
     }
-
-    public String predict(Observation observation){
-        int prediction = (int) activation(netCalc(observation));
-        return prediction == 1 ? positiveLabel : negativeLabel;
+    public double testAccuracy(List<Observation> testList){
+        int correct = 0;
+        for (Observation o : testList){
+            String prediction = predict(o);
+            if (o.getLabel().equals(prediction)){
+                correct++;
+            }
+        }
+        return (double) correct / testList.size() * 100;
     }
 
+
+    public String predict(Observation observation){
+        int prediction = activation(netCalc(observation));
+        return prediction == 1 ? positiveLabel : negativeLabel;
+    }
+    public void classifyFromConsole() {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            System.out.println("Podaj cechy obserwacji oddzielone przecinkami:");
+            String input = reader.readLine();
+            String[] featureStrings = input.split(",");
+            double[] features = new double[featureStrings.length];
+            for (int i = 0; i < featureStrings.length; i++) {
+                features[i] = Double.parseDouble(featureStrings[i]);
+            }
+
+            Observation observation = new Observation(features);
+            String prediction = predict(observation);
+            System.out.println("Klasyfikacja dla podanej obserwacji: " + prediction);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
