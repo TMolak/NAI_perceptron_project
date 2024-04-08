@@ -27,19 +27,19 @@ public class Perceptron {
         initializeWeights(numOfWeights);
     }
 
-    public List<Observation> loadData(String path){
+    public List<Observation> loadData(String path) {
         List<Observation> list = new ArrayList<>();
         int labelIndex = 0;
 
-        try(BufferedReader br = new BufferedReader(new FileReader(path))){
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
-            while((line = br.readLine()) != null){
+            while ((line = br.readLine()) != null) {
                 String[] splitedLine = line.split(",");
-                double[] features = new double[splitedLine.length-1];
+                double[] features = new double[splitedLine.length - 1];
                 for (int i = 0; i < features.length; i++) {
                     features[i] = Double.parseDouble(splitedLine[i]);
                 }
-                String label = splitedLine[splitedLine.length-1];
+                String label = splitedLine[splitedLine.length - 1];
 
                 Observation observation = new Observation(label, features);
                 list.add(observation);
@@ -48,7 +48,7 @@ public class Perceptron {
                     labelMap.put(label, labelIndex++);
                 }
             }
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
         positiveLabel = labelMap.keySet().iterator().next();
@@ -63,19 +63,19 @@ public class Perceptron {
         return list;
     }
 
-    private void initializeWeights(int size){
+    private void initializeWeights(int size) {
         weights = new double[size];
         for (int i = 0; i < size; i++) {
-            weights[i] = Math.random() * 0.1 - 0.05;
+            weights[i] = Math.random() * 0.1 + 0.05;
         }
-        bias = Math.random() * 0.1 - 0.05;
+        bias = Math.random() * 0.1 + 0.05;
     }
 
-    private int activation(double net){
+    private int activation(double net) {
         return net > 0 ? 1 : 0;
     }
 
-    private double netCalc(Observation observation){
+    private double netCalc(Observation observation) {
         double net = 0;
         for (int i = 0; i < observation.getFeatures().length; i++) {
             net += observation.getFeatures()[i] * weights[i];
@@ -84,27 +84,28 @@ public class Perceptron {
         return net;
     }
 
-    public void train(List<Observation> observationList){
+    public void train(List<Observation> observationList) {
         for (int i = 0; i < epoch; i++) {
             for (Observation observation : observationList) {
                 double predicted = activation(netCalc(observation));
                 double trueLabel = labelMap.get(observation.getLabel());
                 double error = trueLabel - predicted;
                 for (int j = 0; j < observation.getFeatures().length; j++) {
-                    weights[j] += (trueLabel-predicted)*learningRate*observation.getFeatures()[j];
+                    weights[j] += (trueLabel - predicted) * learningRate * observation.getFeatures()[j];
                 }
                 bias += learningRate * error;
             }
             double accuracy = testAccuracy(testList);
-            System.out.println("Dokładność po epoce " + (i+1) + ": " + accuracy + "%");
+            System.out.println("Dokładność po epoce " + (i + 1) + ": " + accuracy + "%");
             Collections.shuffle(observationList);
         }
     }
-    public double testAccuracy(List<Observation> testList){
+
+    public double testAccuracy(List<Observation> testList) {
         int correct = 0;
-        for (Observation o : testList){
+        for (Observation o : testList) {
             String prediction = predict(o);
-            if (o.getLabel().equals(prediction)){
+            if (o.getLabel().equals(prediction)) {
                 correct++;
             }
         }
@@ -112,10 +113,11 @@ public class Perceptron {
     }
 
 
-    public String predict(Observation observation){
+    public String predict(Observation observation) {
         int prediction = activation(netCalc(observation));
         return prediction == 1 ? positiveLabel : negativeLabel;
     }
+
     public void classifyFromConsole() {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         try {
